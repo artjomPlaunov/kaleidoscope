@@ -9,7 +9,7 @@
 
 using namespace llvm;
 
-CodeGen TheCodeGen;
+
 
 CodeGen::CodeGen() {}
 
