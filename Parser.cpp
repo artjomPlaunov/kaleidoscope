@@ -72,9 +72,22 @@ std::unique_ptr<ExprAST> Parser::ParsePrimary() {
         return ParseIdentifierExpr();
     case tok_number:
         return ParseNumberExpr();
+    case '~': 
+        return ParseUnaryExpr();
     case '(':
         return ParseParenExpr();
     }
+}
+
+
+std::unique_ptr<ExprAST> Parser::ParseUnaryExpr() {
+    char op = lexer.getCurrentToken();
+    lexer.getNextToken();
+    auto Expr = ParsePrimary();
+    if (!Expr) {
+        return nullptr;
+    }
+    return std::make_unique<UnaryExprAST>(op, std::move(Expr));
 }
 
 std::unique_ptr<ExprAST> Parser::ParseBinOpRHS(int ExprPrec, std::unique_ptr<ExprAST> LHS) {

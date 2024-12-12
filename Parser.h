@@ -28,6 +28,7 @@ private:
 
     // Parsing helpers
     std::unique_ptr<ExprAST> ParseNumberExpr();
+    std::unique_ptr<ExprAST> ParseUnaryExpr();
     std::unique_ptr<ExprAST> ParseParenExpr();
     std::unique_ptr<ExprAST> ParseIdentifierExpr();
     std::unique_ptr<ExprAST> ParsePrimary();

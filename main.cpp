@@ -1,6 +1,9 @@
-#include "KaleidoscopeDriver.h"
 #include "CodeGen.h"
 #include "llvm/Support/raw_ostream.h"
+#include "Lexer.h"
+#include "Parser.h"
+#include "CodeGen.h"
+
 
 static void HandleDefinition(Parser &parser, CodeGen &codeGen) {
     if (auto FnAST = parser.ParseDefinition()) {

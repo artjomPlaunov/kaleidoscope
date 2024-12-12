@@ -14,6 +14,15 @@ public:
     virtual llvm::Value *codegen(CodeGen &CG) = 0;
 };
 
+class UnaryExprAST : public ExprAST {
+    char Op;
+    std::unique_ptr<ExprAST> Expr;
+public:
+    UnaryExprAST(char Op, std::unique_ptr<ExprAST> Expr) 
+        : Op(Op), Expr(std::move(Expr)) {}
+    llvm::Value *codegen(CodeGen &CG) override;
+};
+
 class NumberExprAST : public ExprAST {
     double Val;
 public:
@@ -56,6 +65,9 @@ public:
         : Name(Name), Args(std::move(Args)) {}
     llvm::Function *codegen(CodeGen &CG);
     const std::string &getName() const { return Name; }
+    const std::vector<std::string>& getArgs() const {
+        return Args;
+    }
 };
 
 class FunctionAST {

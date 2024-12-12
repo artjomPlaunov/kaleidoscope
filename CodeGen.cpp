@@ -36,6 +36,20 @@ Value *VariableExprAST::codegen(CodeGen &CG) {
     return V;
 }
 
+Value *UnaryExprAST::codegen(CodeGen &CG) {
+    Value *R = Expr->codegen(CG);
+    if (!R) {
+        return nullptr;
+    }
+    switch (Op) {
+        case '~':
+            return CG.getBuilder()->CreateFNeg(R, "negtemp");
+        default:
+            return CG.LogErrorV("invalid unary operator");
+    }
+}
+
+
 Value *BinaryExprAST::codegen(CodeGen &CG) {
     Value *L = LHS->codegen(CG);
     Value *R = RHS->codegen(CG);
@@ -100,9 +114,33 @@ Function *PrototypeAST::codegen(CodeGen &CG) {
 Function *FunctionAST::codegen(CodeGen &CG) {
     // First, check for an existing function from a previous 'extern' declaration.
     Function *TheFunction = CG.getModule()->getFunction(Proto->getName());
-
-    if (!TheFunction)
+    if (!TheFunction) {
         TheFunction = Proto->codegen(CG);
+    } else {
+        // We have an extern prototype, so we do a quick and dirty alpha conversion hack
+        // and rename the prototype variables if they conflict. Note that this needs to be 
+        // changed if we introduce more features into the language, since the alpha conversion
+        // may not work anymore. 
+
+        // First check if there is an argument mismatch. 
+        // NOTE: this is a "type equality" check between the prototype and the definition. 
+        // Right now this works because type equality is just determined by number of double 
+        // arguments, and all functions return double so we do not check that. 
+
+        // This will need to be modified to be actual type equality later on. 
+        if (TheFunction->arg_size() != Proto->getArgs().size())
+            return nullptr;
+        // Now we iterate over the function arguments and change names in the prototype 
+        // as necessary. 
+        unsigned int idx = 0;
+        auto defArgs = Proto->getArgs();
+        for (auto &Arg: TheFunction->args()) {
+            if (Arg.getName() != defArgs[idx]) {
+                Arg.setName(defArgs[idx]);
+            }
+            idx++;
+        }
+    }
 
     if (!TheFunction)
         return nullptr;
